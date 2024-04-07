@@ -1,36 +1,23 @@
 import sys
-from essay_grader import EssayGrader  # Assume you have a module `essay_grader` that contains your grading logic
+import pandas 
+import spacy
+import numpy
+import os
 
-def main(essay_file_path):
-    """
-    Main function to grade an essay based on various criteria.
-
-    :param essay_file_path: Path to the file containing the essay to grade.
-    """
+def read_text_file(file_path):
     try:
-        with open(essay_file_path, 'r', encoding='utf-8') as file:
-            essay_text = file.read()
-
-        grader = EssayGrader()
-        score_report = grader.grade_essay(essay_text)
-
-        print("Essay Score Report:")
-        print("===================")
-        for criterion, score in score_report.items():
-            print(f"{criterion}: {score}")
-
-        final_score = grader.calculate_final_score(score_report)
-        print("\nFinal Score:", final_score)
-        print("Final Judgment:", "High" if final_score > grader.threshold else "Low")
-
+        with open(file_path, 'r') as file:
+            contents = file.read()
+            print(f"Contents of '{file_path}':")
+            print(contents)
     except FileNotFoundError:
-        print(f"Error: The file {essay_file_path} was not found.")
-    except Exception as e:
-        print(f"An unexpected error occurred: {str(e)}")
+        print(f"Error: File '{file_path}' not found.")
+
+def main():
+    directory = 'essays_dataset/essays/'
+    file_name = input("Enter the name of the text file to read from: ").strip("'\"")
+    file_path = os.path.join(directory, file_name)
+    read_text_file(file_path)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python main.py <path_to_essay_file>")
-    else:
-        essay_file_path = sys.argv[1]
-        main(essay_file_path)
+    main()
