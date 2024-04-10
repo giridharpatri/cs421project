@@ -4,6 +4,7 @@ import spacy
 import numpy
 import os
 from spellchecker import SpellChecker
+import re
 
 def read_text_file(file_path):
     try:
@@ -33,11 +34,9 @@ def spell_check(essay):
 
     spell = SpellChecker()
     words = essay.split()
-    words = [word for word in words if word.isalpha()]
+    words = re.findall(r'\b\w+\b', essay.lower()) 
     misspelled = spell.unknown(words)
     num_mistakes = len(misspelled)
-
-    # Scoring based on the number of mistakes
     if num_mistakes > 20:
         return 4
     elif num_mistakes > 15:
@@ -49,7 +48,6 @@ def spell_check(essay):
     else:
         return 0
     
-
 
 def main():
     directory = 'essays_dataset/essays/'
