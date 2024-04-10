@@ -3,6 +3,7 @@ import pandas
 import spacy
 import numpy
 import os
+from spellchecker import SpellChecker
 
 def read_text_file(file_path):
     try:
@@ -26,10 +27,28 @@ def count_sentences(essay):
         if finite_verbs:
             sentence_count += 1 
             # print(sent)
- 
-    print(sentence_count)
     return sentence_count
 
+def spell_check(essay):
+
+    spell = SpellChecker()
+    words = essay.split()
+    words = [word for word in words if word.isalpha()]
+    misspelled = spell.unknown(words)
+    num_mistakes = len(misspelled)
+
+    # Scoring based on the number of mistakes
+    if num_mistakes > 20:
+        return 4
+    elif num_mistakes > 15:
+        return 3
+    elif num_mistakes > 10:
+        return 2
+    elif num_mistakes > 5:
+        return 1
+    else:
+        return 0
+    
 
 
 def main():
@@ -42,12 +61,14 @@ def main():
         file_path = os.path.join(directory, file_name)
         contents = read_text_file(file_path)  # Assign the returned content to contents variable 
 
-        count_sentences(contents)
-        
-        # if contents is not None:  # Check if contents is not None before proceeding
-        #     # Count sentences in the text
-        #     num_sentences = count_sentences(contents)
-        #     print("Number of Sentences:", num_sentences)
+        if contents is not None:
+            # Count sentences in the text
+            num_sentences = count_sentences(contents)
+            print(f"Number of Sentences: {num_sentences}")
+            # Calculate the spelling score
+            spelling_score = spell_check(contents)
+            print(f"Spelling Score: {spelling_score}")
+
 
 if __name__ == "__main__":
     main()
