@@ -63,6 +63,35 @@ def check_main_verbs(essay, nlp):
             sentences_with_main_verbs += 1
 
     return sentences_with_main_verbs, total_sentences
+def analyze_verb_errors(essay, nlp):
+    doc = nlp(essay)
+    error_count = 0
+    total_verbs = 0
+
+    # Define common error patterns in POS tags
+    error_patterns = [
+        ['PRON', 'VERB', 'NOUN'],  # Hypothetical incorrect sequence
+        ['VERB', 'VERB', 'VERB'],  # Potentially incorrect consecutive verbs
+    ]
+
+    for sent in doc.sents:
+        pos_tags = [token.pos_ for token in sent if not token.is_punct]
+        total_verbs += sum(1 for tag in pos_tags if tag == 'VERB')
+
+        # Check for defined error patterns within the sentence
+        for i in range(len(pos_tags) - max(len(pattern) for pattern in error_patterns) + 1):
+            for pattern in error_patterns:
+                if pos_tags[i:i+len(pattern)] == pattern:
+                    error_count += 1
+
+    if total_verbs > 0:
+        error_ratio = error_count / total_verbs
+    else:
+        error_ratio = 0
+
+    # Calculate the score based on the number of errors detected
+    score = max(5 - int(5 * error_ratio), 1)
+    return score
 
 def spell_check(essay):
     spell = SpellChecker()
@@ -82,8 +111,7 @@ def spell_check(essay):
 
 def main():
     directory = 'essays_dataset/essays/'
-    # Load the SpaCy model once and reuse it
-    nlp = spacy.load("en_core_web_sm")  # Load the SpaCy NLP model
+    nlp = spacy.load("en_core_web_sm")  # Load the SpaCy NLP model once
     while True:
         file_name = input("Enter the name of the text file to read from (press 'e' to exit): ").strip("'\"")
         if file_name.lower() == 'e':
@@ -97,12 +125,13 @@ def main():
             spelling_score = spell_check(contents)
             agreement_score = score_subject_verb_agreement(contents, nlp)
             main_verbs_count, total_sentences = check_main_verbs(contents, nlp)
+            pattern_error_score = analyze_verb_errors(contents, nlp)
 
             print(f"Number of Sentences: {num_sentences}")
             print(f"Spelling Score: {spelling_score}")
             print(f"Subject-Verb Agreement Score: {agreement_score}")
-            print(f"Sentences with Main Verbs: {main_verbs_count} out of {num_sentences}")
-
+            print(f"Sentences with Main Verbs: {main_verbs_count} out of {total_sentences}")
+            print(f"Pattern of Error Score: {pattern_error_score}")
 
 if __name__ == "__main__":
     main()
