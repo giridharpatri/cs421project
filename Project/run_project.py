@@ -7,7 +7,7 @@ nltk.download('punkt')
 nltk.download('averaged_perceptron_tagger')
 
 def main():
-    directory = 'essays_dataset/essays/'
+    directory = 'Project/essays_dataset/essays/'
 
     nlp = spacy.load("en_core_web_sm")  
     while True:
