@@ -5,7 +5,14 @@ from pathlib import Path
 import statistics 
 import spacy
 from nltk import pos_tag, word_tokenize
-
+import numpy as np
+from scipy import sparse
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_similarity
+from scipy import sparse
+import numpy as np
+from scipy import sparse
+from sklearn.metrics.pairwise import cosine_similarity
 
 # read file
 def read_text_file(file_path):
@@ -151,3 +158,57 @@ def spell_check(essay):
         return 1
     else:
         return 0
+    
+def evaluate_syntactic_well_formedness(essay, nlp):
+    doc = nlp(essay)
+    errors = 0
+    total_sentences = 0
+    
+    for sent in doc.sents:
+        total_sentences += 1
+        # Check for common syntactic mistakes:
+        # 1. Missing finite verb in the main clause
+        if not any(token.pos_ == 'VERB' and token.dep_ not in {'aux', 'auxpass'} for token in sent):
+            errors += 1
+        # 2. Incorrect use of subordinating conjunctions
+        for token in sent:
+            if token.dep_ == 'mark' and not (token.head.pos_ == 'VERB' and token.head.dep_ in {'advcl', 'csubj', 'ccomp'}):
+                errors += 1
+    
+    error_ratio = errors / total_sentences if total_sentences > 0 else 1
+    # Score mapping based on error ratio
+    score = max(5 - int(error_ratio * 5), 1)
+    return score
+
+
+
+def evaluate_essay_coherence(essay, nlp):
+    doc = nlp(essay)
+    embeddings = []
+    
+    for sent in doc.sents:
+        sent_vecs = [token.vector for token in sent if not token.is_stop and token.has_vector]
+        if sent_vecs:
+            # Averaging word vectors of the sentence
+            embeddings.append(sparse.csr_matrix(np.mean(sent_vecs, axis=0)))
+    
+    # Compute cosine similarity between consecutive sentences
+    if len(embeddings) > 1:
+        sim_scores = cosine_similarity(sparse.vstack(embeddings))
+        avg_sim = np.mean([sim_scores[i, i + 1] for i in range(len(embeddings) - 1)])
+    else:
+        avg_sim = 0  # Not enough sentences for comparison
+    
+    # Mapping average similarity to a score
+    if avg_sim > 0.75:
+        score = 5
+    elif avg_sim > 0.60:
+        score = 4
+    elif avg_sim > 0.45:
+        score = 3
+    elif avg_sim > 0.30:
+        score = 2
+    else:
+        score = 1
+    
+    return score
