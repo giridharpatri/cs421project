@@ -35,14 +35,22 @@ def main():
             syntactic_score = evaluate_syntactic_well_formedness(contents, nlp)
             coherence_score = evaluate_essay_coherence(contents, nlp)
 
+            # Calculating the final score (assuming each score part contributes equally)
+            final_score = (2 * num_sentences - spelling_score + agreement_score +
+                           2 * syntactic_score + 3 * coherence_score)
+
+            # Determine if the score is High or Low
+            # This threshold can be adjusted based on analysis of scores distribution for High and Low essays
+            threshold = 50  # This is an example threshold, adjust based on actual scoring scale and distribution
+            qualitative_score = "High" if final_score >= threshold else "Low"
             print(f"Number of Sentences score: {num_sentences}")
             print(f"Spelling Deductions: {spelling_score}")
             print(f"Subject-Verb Agreement Score: {agreement_score}")
-            print(f"Verb tense Score: {pattern_error_score}")
+            print(f"Verb Tense Error Score: {pattern_error_score}")
             print(f"Sentences with Main Verbs: {main_verbs_count} out of {total_sentences}")
             print(f"Syntactic Well-Formedness Score: {syntactic_score}")
-            print(f"Coherence Score: {coherence_score}\n")
-
+            print(f"Coherence Score: {coherence_score}")
+            print(f"Final Score: {final_score}\n")
 
 if __name__ == "__main__": 
     main()
