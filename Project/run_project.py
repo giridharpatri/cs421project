@@ -35,8 +35,8 @@ def main():
             syntactic_score = evaluate_syntactic_well_formedness(contents, nlp)
             coherence_score = evaluate_essay_coherence(contents, nlp)
 
-            final_score = (2 * num_sentences - spelling_score + agreement_score +
-                           2 * syntactic_score + 3 * coherence_score)
+            final_score = (2 * (num_sentences - spelling_score + agreement_score + main_verbs_count)
+                            + 2 * (syntactic_score) + 3 * (coherence_score ))
 
             threshold = 20.44 
             qualitative_score = "High" if final_score >= threshold else "Low"
