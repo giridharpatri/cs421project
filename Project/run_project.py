@@ -8,6 +8,7 @@ import os
 import nltk
 import numpy as np
 from scipy import sparse
+import pandas as pd
 
 # Download necessary NLTK resources
 nltk.download('punkt')
@@ -15,6 +16,7 @@ nltk.download('averaged_perceptron_tagger')
 
 def main():
     directory = 'Project/essays_dataset/essays/'
+    index_df = pd.read_csv('Project/essays_dataset/index.csv', delimiter=';')
 
     # Load Spacy NLP model
     nlp = spacy.load("en_core_web_sm")  
@@ -27,18 +29,19 @@ def main():
         file_path = os.path.join(directory, file_name)
         contents = read_text_file(file_path)
         if contents:
+            prompt = index_df[index_df['filename'] == file_name]['prompt'].iloc[0]
             num_sentences = count_sentences(contents, nlp)
             spelling_score = spell_check(contents)
             agreement_score = score_subject_verb_agreement(contents, nlp)
             main_verbs_count, total_sentences = check_main_verbs(contents, nlp)
             pattern_error_score = analyze_verb_errors(contents, nlp)
             syntactic_score = evaluate_syntactic_well_formedness(contents, nlp)
-            coherence_score = evaluate_essay_coherence(contents, nlp)
+            coherence_score = evaluate_essay_coherence(contents, prompt, nlp)  # Pass prompt here
 
             final_score = (2 * (num_sentences - spelling_score + agreement_score + main_verbs_count)
                             + 2 * (syntactic_score) + 3 * (coherence_score ))
 
-            threshold = 20.44 
+            threshold = 50
             qualitative_score = "High" if final_score >= threshold else "Low"
 
             print(f"Number of Sentences score: {num_sentences}")

@@ -176,22 +176,21 @@ def evaluate_syntactic_well_formedness(essay, nlp):
     return score
 
 
+def evaluate_essay_coherence(essay, prompt, nlp):
+    essay_doc = nlp(essay)
+    prompt_doc = nlp(prompt) 
 
-def evaluate_essay_coherence(essay, nlp):
-    doc = nlp(essay)
-    embeddings = []
+    # print(f'HERE IS THE PROMPT: {prompt_doc}')
     
-    for sent in doc.sents:
-        sent_vecs = [token.vector for token in sent if not token.is_stop and token.has_vector]
-        if sent_vecs:
-            embeddings.append(sparse.csr_matrix(np.mean(sent_vecs, axis=0)))
+    essay_embeddings = [sparse.csr_matrix(np.mean([token.vector for token in sent if not token.is_stop and token.has_vector], axis=0))
+                        for sent in essay_doc.sents if any(token.has_vector for token in sent)]
+    prompt_embedding = sparse.csr_matrix(np.mean([token.vector for token in prompt_doc if not token.is_stop and token.has_vector], axis=0))
     
-    if len(embeddings) > 1:
-        sim_scores = cosine_similarity(sparse.vstack(embeddings))
-        avg_sim = np.mean([sim_scores[i, i + 1] for i in range(len(embeddings) - 1)])
+    if essay_embeddings:
+        sim_scores = cosine_similarity(sparse.vstack(essay_embeddings), prompt_embedding)
+        avg_sim = np.mean(sim_scores)
     else:
-        avg_sim = 0  
-
+        avg_sim = 0
 
     if avg_sim > 0.75:
         score = 5
