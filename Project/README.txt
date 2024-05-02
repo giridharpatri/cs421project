@@ -26,14 +26,37 @@ Project files & functions:
     
     9. evaluate_essay_coherence: function for determining coherence. Utilizes cosine similarity amongst consectutive sentences 
                                  to determine if an essay stays relatively on topic. 
-
+  
+  Each function calculates the sub-score. The subscores are generally calculated using ratios, and the mappings were based on corpus analysis of 
+  the individual tests. We sampled some high and low essays, and averaged their respective sub-scores. 
 
 
 - run_project.py:
     - contains code for running the project. Place any new essays files in the 'essays' folder in 
         essays_dataset (which is in the same directory as run_project.py and functions.py). Provide the name of the 
-        essay file (no quotes, including .txt at the end) when prompted. 
+        essay file (no quotes, including .txt at the end) when prompted.  
 
+    - Prompts are grabbed from the index.csv file. No need to input a prompt. If you're inputting a new essay, with a new prompt        
+      Then you need to add the file name, prompt, and score to the INDEX.CSV file. 
+
+
+SAMPLE OUTPUT: 
+
+'''' 
+Enter the name of the text file to read from (press 'e' to exit): 38209.txt  
+
+Number of Sentences score: 4
+Spelling Deductions: 1
+Subject-Verb Agreement Score: 3        
+Verb Tense Error Score: 4
+Sentences with Main Verbs: 21 out of 23
+Syntactic Well-Formedness Score: 3     
+Coherence Score: 3
+
+Final Score: 69
+Qualitative Score: High
+
+''''
 
 Packages used:
 - SpaCY
@@ -41,3 +64,7 @@ Packages used:
 - statistics 
 - nltk 
 - re (regular expressions)
+-scipy 
+-sklearn
+-pyspellchecker 
+- pathlib
